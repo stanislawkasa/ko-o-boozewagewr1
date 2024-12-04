@@ -1,0 +1,93 @@
+<div id="wheelContainer2">
+    <canvas id="wheelCanvas2"></canvas>
+    <button id="spinButton2">Spin</button>
+    <div id="result2"></div>
+</div>
+
+<script>
+    const canvas2 = document.getElementById("wheelCanvas2");
+    const ctx2 = canvas2.getContext("2d");
+    const segments2 = [
+        "Napisa 1", "Napisa 2", "Napisa 3", "Napisa 4", 
+        "Napisa 5", "Napisa 6", "Napisa 7", "Napisa 8", 
+        "Napisa 9", "Napisa 10", "Napisa 11", "Napisa 12", 
+        "Napisa 13", "Napisa 14", "Napisa 15", "Napisa 16", 
+        "Napisa 17", "Napisa 18", "Napisa 19", "Napisa 20"
+    ]; // 20 segmentów
+    const spinButton2 = document.getElementById("spinButton2");
+    const result2 = document.getElementById("result2");
+    let currentAngle2 = 0;
+    let spinTimeout2;
+
+    // Ustawienia koła
+    const wheelRadius = 150;
+    canvas2.width = wheelRadius * 2;
+    canvas2.height = wheelRadius * 2;
+
+    // Rysowanie koła
+    function drawWheel2() {
+        const arcSize2 = (2 * Math.PI) / segments2.length;
+        ctx2.clearRect(0, 0, canvas2.width, canvas2.height); // Wyczyść poprzednią animację
+
+        // Rysowanie segmentów
+        segments2.forEach((segment, index) => {
+            const startAngle = currentAngle2 + index * arcSize2;
+            const endAngle = startAngle + arcSize2;
+
+            // Wypełnienie kolorem
+            ctx2.beginPath();
+            ctx2.moveTo(canvas2.width / 2, canvas2.height / 2);
+            ctx2.arc(canvas2.width / 2, canvas2.height / 2, wheelRadius, startAngle, endAngle);
+            ctx2.fillStyle = index % 2 === 0 ? "rgb(11,142,54)" : "rgb(190,21,34)";
+            ctx2.fill();
+            ctx2.stroke();
+        });
+    }
+
+    // Funkcja do obracania koła
+    function spinWheel2() {
+        const spinTime = 3000; // Czas trwania animacji
+        const spinAngle = Math.random() * 2 * Math.PI;
+        const spinStart = currentAngle2;
+        const spinEnd = spinStart + 10 * Math.PI + spinAngle;
+
+        const startTime = performance.now();
+        function animate2(time) {
+            const elapsed = time - startTime;
+            if (elapsed >= spinTime) {
+                currentAngle2 = spinEnd % (2 * Math.PI);
+                const winnerIndex = Math.floor(((2 * Math.PI - currentAngle2 + Math.PI / segments2.length) % (2 * Math.PI)) / (2 * Math.PI / segments2.length));
+                result2.textContent = segments2[winnerIndex];
+                drawWheel2();
+                // Rysowanie napisu po zatrzymaniu
+                drawTextAfterSpin(winnerIndex);
+                return;
+            }
+            currentAngle2 = spinStart + (spinEnd - spinStart) * (elapsed / spinTime);
+            drawWheel2();
+            requestAnimationFrame(animate2);
+        }
+        requestAnimationFrame(animate2);
+    }
+
+    // Funkcja do rysowania napisu po zatrzymaniu koła
+    function drawTextAfterSpin(winnerIndex) {
+        const arcSize2 = (2 * Math.PI) / segments2.length;
+        const startAngle = currentAngle2 + winnerIndex * arcSize2;
+        const x = canvas2.width / 2 + Math.cos(startAngle + arcSize2 / 2) * 70;
+        const y = canvas2.height / 2 + Math.sin(startAngle + arcSize2 / 2) * 70;
+
+        ctx2.fillStyle = "white";
+        ctx2.font = "16px Arial";
+        ctx2.fillText(segments2[winnerIndex], x - 20, y);
+    }
+
+    spinButton2.addEventListener("click", function () {
+        if (spinTimeout2) {
+            clearTimeout(spinTimeout2);
+        }
+        spinWheel2();
+    });
+
+    drawWheel2(); // Inicjalizuj początkowe koło
+</script>
